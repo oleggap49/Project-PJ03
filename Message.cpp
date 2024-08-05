@@ -45,5 +45,15 @@ bool Message::getHasBeenRead()
 {
     return (_HasBeenRead);
 }
+bool Message::SendMessage(int& mess_count, XArray<Message>& mes_arr)
+{
+    bool res = false;
+    this->settime('s');
+    mess_count++;
+    mes_arr.resize(mess_count);
+    mes_arr[mess_count - 1] = *this;
+    res = true;
+    return(res);
+}
     
  

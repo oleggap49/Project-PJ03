@@ -24,19 +24,7 @@ bool SearchNick(string Nick, XArray<User>& user_arr, int& user_id)
         }
     return Found;    
     }
-//процедура создает новое сообщение и помещает его в контейнер непрочтенных сообщений
-// в случае успеха - возвращает true
-bool SendMessage(int user_id, int rec_id, string Text,int& mess_count, XArray<Message>& mes_arr)
-{
-    bool res = false;
-    Message message(user_id, rec_id, Text);
- message.settime('s');
- mess_count++;
- mes_arr.resize(mess_count);
-  mes_arr[mess_count - 1] = message; 
-  res = true;
-  return(res);
- }
+
  
 int main()
 {
@@ -155,14 +143,14 @@ int main()
         {
             try
             {
-            if (user_arr[user_id].getAutorized()== false)  //проверка на авторизацию
+             if (user_arr[user_id].getAutorized()== false)  //проверка на авторизацию
                 throw NotAutorized();
-            cout << "СООБЩЕНИЕ: " << endl;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            string Text;
-            getline(cin, Text);                             // ввод текста сообщения
-            cout << " Кому:" << endl;
-            getline(cin, Nick);
+             cout << "СООБЩЕНИЕ: " << endl;
+             cin.ignore(numeric_limits<streamsize>::max(), '\n');
+             string Text;
+             getline(cin, Text);                             // ввод текста сообщения
+             cout << " Кому:" << endl;
+             getline(cin, Nick);
             
                 int rec_id;
                   if (Nick == "ALL")             // рассылка всем зарегистрированным пользователям          
@@ -170,18 +158,26 @@ int main()
                      for (int i{ 0 }; i < user_arr.getLength(); ++i)
                      {
                          rec_id = i;
-                         if(user_id != rec_id)            // самому себе не посылаем
-                        if( !SendMessage(user_id, rec_id, Text, mess_count, mes_arr)) // сообщение всем, кроме себя
-                            throw MessNotSent(); // если SendMessage вернула false, аварийное сообщение - не отправлено
+                         if (user_id != rec_id)            // самому себе не посылаем
+                         {
+                             Message message(user_id, rec_id, Text);
+                             if (!message.SendMessage(mess_count, mes_arr)) // сообщение всем, кроме себя
+                                 throw MessNotSent(); // если SendMessage вернула false, аварийное сообщение - не отправлено
+                         }
+                        
                      }
                 }
                   else          // сообщение одному пользователю
 
                   {
                       if (!SearchNick(Nick, user_arr, rec_id))   throw UsernameNotExist(); //проверка, есть ли такой пользователь
-                      if (!SendMessage(user_id, rec_id, Text, mess_count, mes_arr))
-                          throw MessNotSent(); // если SendMessage вернула false, аварийное сообщение - не отправлено;
+                      {
+                          Message message(user_id, rec_id, Text);
+                          if (!message.SendMessage(  mess_count, mes_arr))
+                              throw MessNotSent(); // если SendMessage вернула false, аварийное сообщение - не отправлено;
+                      }
                   }
+
                
             }
             catch (exception& e)

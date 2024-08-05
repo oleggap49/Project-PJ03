@@ -28,5 +28,6 @@ public:
 	char* get_time(char pr);
 	void setHasBeenRead(bool pr);
 	bool getHasBeenRead();
+	bool SendMessage(int& mess_count, XArray<Message>& mes_arr);
 };
 
