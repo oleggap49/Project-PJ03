@@ -8,41 +8,30 @@
 #include "Message.h"
 #include <exception>
 #include "MyExceptions.h"
+ 
 using namespace std;
 
-//процедура поиска по Nick в контейнере пользователей user_arr
-// при успешном поиске устанавливает идентификатор найденного пользователя user_id и возвращает true
-// если не нашла -возвращает false
-bool SearchNick(string Nick, XArray<User>& user_arr, int& user_id)
-{
-    bool  Found = false;
-    for (int i{ 0 }; i < user_arr.getLength(); ++i)
-        if (user_arr[i].getNickname() == Nick)
-        {
-            user_id = i;
-            Found = true;          
-        }
-    return Found;    
-    }
-
- 
 int main()
 {
     setlocale(LC_ALL, "");
     string hor_line = "\n----------------------------------\n";
     cout << "Добро пожаловать в чат!" << hor_line;
     char oper;
-    int  user_num = 0;  // количество юзеров в чате
-    int  user_id = 0;  // id текущего юзера
+    int  user_num = 1;  // количество юзеров в чате
+    int  user_id = 0;  // id текущего юзера 
+    int mess_count = 1; // количество непрочтенных сообщений
+    int  logm_count = 1;   // количество архивных сообщений
     string Nick = "admin";
     string Pass = "admin";
+    
     User  auser(Nick, Pass,true);   // создали учетную запись администратора
-     user_num++;
+    Message amessage(0, 0, hor_line);
         XArray<User> user_arr(user_num); // создали контейнер для пользователей
-        int mess_count = 1; // количество непрочтенных сообщений
+       
         XArray<Message> mes_arr(mess_count); // создали контейнер для непрочтенных сообщений
-        int  logm_count = 1;               // количество архивных сообщений
+                    
         XArray<Message> logm_arr(logm_count); // создали контейнер для архивных  сообщений
+       
     user_arr[user_num - 1] = auser;         // первый пользователь  - админ
    do
     {
@@ -53,90 +42,39 @@ int main()
         {
         case 'r':
         {
-            cout << " РЕГИСТРАЦИЯ" << endl;
-            cout <<
-                " Придумайте НИК:" << endl;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-            getline(cin, Nick);
-            try
-            {
-                if (Nick == "ALL") throw ALLisreserved(); //имя ALL зарезнрвировано для групповой рассылки
-                for (int i{ 0 }; i < user_arr.getLength(); ++i)
-                    if (user_arr[i].getNickname() == Nick)  throw UsernameExist();     // проверка, есть такой пользователь
-
-                cout <<
-                    " Придумайте Пароль:" << endl;
-
-                getline(cin, Pass);
-
-                User user(Nick, Pass);         // создание нового пользователя
-
-                user_num++;
-                  
-                user_arr.resize(user_num);
-                user_arr[user_num - 1] = user; // сохранение нового пользователя в контейнере
-                cout << "Здравствуйте, " << user_arr[user_num - 1].getNickname() << "!\n"
-                    << endl;
-            }
-            catch (exception& e)
-            {
-                cout << e.what();
-            }
+            auser.Registration(user_arr, user_num);
         }
         break;
         case 'a':
         {
-            cout << " АВТОРИЗАЦИЯ" << endl;
-            cout <<
-                " Введите НИК:" << endl;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-            getline(cin, Nick);
-            try
-            {
-                if (!SearchNick(Nick, user_arr, user_id) )   throw UsernameNotExist(); //проверка, зарегистрирован ли такой пользователь
-                 
-                cout <<
-                    " Введите пароль:" << endl;
-                getline(cin, Pass);
-                if (user_arr[user_id].getPassword() == Pass) // проверка пароля
+            auser.Authorization(user_arr, user_id);
+           
+            
+            for (int i{ 1 }; i < mes_arr.getLength(); ++i) //просматриваем непрочтенные сообщения
+                //начинаем с  1, 0-е сообщение не читается
+                if (mes_arr[i].getrecipient_id() == user_id) // проверяем, есть ли для этого пользователя непрочтенные сообщения
                 {
-                    user_arr[user_id].setAutorized(true);  //признак , что пользователь авторизован
-                    cout     << user_arr[user_id].getNickname()<<", вы успешно авторизованы!" << hor_line;
+                    string ts = mes_arr[i].get_time('s');
+                    //выводим на экран
+                    cout << "Сообщение от "
+                        << user_arr[mes_arr[i].getsender_id()].getNickname() //автор
+                        << ":" << endl
+                        << ts                                                //время создания 
+                        << mes_arr[i].gettext() << endl;                     // текст
+                    mes_arr[i].settime('r');           //установил время прочтения
+                    mes_arr[i].setHasBeenRead(true);   // пометил прочтенным
                 }
-                else  throw WrongPassword();
-                for (int i{ 1 }; i < mes_arr.getLength(); ++i) //просматриваем непрочтенные сообщения
-                                                               //начинаем с  1, 0-е сообщение не читается
-                    if (mes_arr[i].getrecipient_id() == user_id) // проверяем, есть ли для этого пользователя непрочтенные сообщения
-                    {
-                        string ts = mes_arr[i].get_time('s');
-                                                                                 //выводим на экран
-                        cout << "Сообщение от "
-                            << user_arr[mes_arr[i].getsender_id()].getNickname() //автор
-                            << ":" << endl
-                            << ts                                                //время создания 
-                            << mes_arr[i].gettext() << endl;                     // текст
-                        mes_arr[i].settime('r');           //установил время прочтения
-                        mes_arr[i].setHasBeenRead(true);   // пометил прочтенным
-                    }
-
-                for (int i{ 1 }; i < mes_arr.getLength(); ++i)
-                    if (mes_arr[i].getHasBeenRead() == true) //все прочтенные переносим в архив
+ 
+            for (int i{ 1 }; i < mes_arr.getLength(); ++i)
+                if (mes_arr[i].getHasBeenRead() == true) //все прочтенные переносим в архив
                 {
-                        logm_count++;
-                        logm_arr.resize(logm_count);
-                        logm_arr[logm_count - 1] = mes_arr[i]; // добавил а архив
-                        mes_arr.remove(i);   // убрал из непрочитанных
-                        mess_count--;
+                    logm_count++;
+                    logm_arr.resize(logm_count);
+                    logm_arr[logm_count - 1] = mes_arr[i]; // добавил а архив
+                    mes_arr.remove(i);   // убрал из непрочитанных
+                    mess_count--;
 
-                 }
-            }
-            catch (exception& e)
-            {
-                cout << e.what();
-            }
-
+                }
         }
         break;
         case 'm':
@@ -170,7 +108,7 @@ int main()
                   else          // сообщение одному пользователю
 
                   {
-                      if (!SearchNick(Nick, user_arr, rec_id))   throw UsernameNotExist(); //проверка, есть ли такой пользователь
+                      if (!user_arr[user_id].SearchNick(Nick, user_arr, rec_id))   throw UsernameNotExist(); //проверка, есть ли такой пользователь
                       {
                           Message message(user_id, rec_id, Text);
                           if (!message.SendMessage(  mess_count, mes_arr))
@@ -243,12 +181,9 @@ int main()
        
 
         }
-
-        cout << hor_line
-            <<"В чате " << user_num   << " участников:" << endl;
-        for (int i{ 0 }; i < user_arr.getLength(); ++i)
-            cout << i+1 << " : " << user_arr[i].getNickname() <<endl;
-
+         auser.ShowUserList(user_arr);
+        
+         
    } while (oper != 'q');
     
     return 0;

@@ -55,5 +55,22 @@ bool Message::SendMessage(int& mess_count, XArray<Message>& mes_arr)
     res = true;
     return(res);
 }
+void Message::CheckMessage(XArray<Message>& mes_arr, int user_id, string sender)
+{
+    for (int i{ 1 }; i < mes_arr.getLength(); ++i) //просматриваем непрочтенные сообщения
+        //начинаем с  1, 0-е сообщение не читается
+        if (mes_arr[i].getrecipient_id() == user_id) // проверяем, есть ли для этого пользователя непрочтенные сообщения
+        {
+            string ts = mes_arr[i].get_time('s');
+            //выводим на экран
+            cout << "Сообщение от "
+                << sender                                     //автор
+                << ":" << endl
+                << ts                                                //время создания 
+                << mes_arr[i].gettext() << endl;                     // текст
+            mes_arr[i].settime('r');           //установил время прочтения
+            mes_arr[i].setHasBeenRead(true);   // пометил прочтенным
+        }
+}
     
  

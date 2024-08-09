@@ -1,5 +1,7 @@
 #pragma once
-#include <exception>
+// классы -наследники exception для перхвата нештатных ситуаций связанных с неверным вводом данных
+#include <exception>  
+
 class  UsernameExist : public exception
 {
 public:

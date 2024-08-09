@@ -29,5 +29,6 @@ public:
 	void setHasBeenRead(bool pr);
 	bool getHasBeenRead();
 	bool SendMessage(int& mess_count, XArray<Message>& mes_arr);
+ 	void CheckMessage(XArray<Message>& mes_arr, int user_id, string sender);
 };
 

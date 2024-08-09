@@ -20,6 +20,11 @@ public:
 	bool getAdmin();
 	void setAutorized(bool autorized);
 	bool getAutorized();
+	bool ShowUserList(XArray<User>& user_arr);
+	bool SearchNick(string Nick, XArray<User>& user_arr, int& user_id);
+	bool Registration(XArray<User>& user_arr, int &user_num);
+	bool Authorization(XArray<User>& user_arr, int& user_id);
+	
 private:
 	
 	string _nickname;
